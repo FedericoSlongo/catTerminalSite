@@ -1,4 +1,4 @@
-let currentDir = "/";
+let currentDir = ""; // root of the site, not "/"
 
 const output = document.getElementById("term");
 
@@ -23,22 +23,23 @@ function nowTime() {
 }
 
 function normalizePath(path) {
-  if (!path || path === "/") return "/";
-  if (!path.startsWith("/")) path = "/" + path;
-  if (!path.endsWith("/")) path += "/";
+  if (!path || path === "/" || path === "./") return "";
+  path = String(path).replace(/^\.\/+/, "").replace(/^\/+/, "");
+  if (path && !path.endsWith("/")) path += "/";
   return path;
 }
 
 function parentDir(path) {
   path = normalizePath(path);
-  if (path === "/") return "/";
+  if (!path) return "";
   const parts = path.split("/").filter(Boolean);
   parts.pop();
-  return parts.length ? "/" + parts.join("/") + "/" : "/";
+  return parts.length ? parts.join("/") + "/" : "";
 }
 
 function makePromptHTML() {
-  return `${nowTime()} <span style="color: lightgreen;">cat</span>@<span style="color: cyan;">zero</span>:<span style="color: yellow;">${currentDir}</span> `;
+  const displayDir = "/" + currentDir;
+  return `${nowTime()} <span style="color: lightgreen;">cat</span>@<span style="color: cyan;">zero</span>:<span style="color: yellow;">${displayDir}</span> `;
 }
 
 function renderPrompt() {
@@ -63,6 +64,7 @@ function renderPrompt() {
   currentCommand = "";
   capture.value = "";
   capture.focus();
+  scrollToBottom();
 }
 
 function updateCurrentLine() {
@@ -89,41 +91,28 @@ function printHTMLContent(html) {
   const container = document.createElement("div");
   container.style.whiteSpace = "pre-wrap";
 
-  // Escape everything first
   let sanitized = html
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-  // Re-enable allowed tags
   sanitized = sanitized
-    // <b>
     .replace(/&lt;(\/?b)&gt;/gi, "<$1>")
-
-    // <p> (with optional id)
     .replace(/&lt;(\/?p)(\s+id\s*=\s*"[^"]*")?&gt;/gi, "<$1$2>")
-
-    // <h1> (with optional id)
+    .replace(/&lt;(\/?span)(\s+id\s*=\s*"[^"]*")?&gt;/gi, "<$1$2>")
     .replace(/&lt;(\/?h1)(\s+id\s*=\s*"[^"]*")?&gt;/gi, "<$1$2>")
-
-    // <br>
     .replace(/&lt;br\s*\/?&gt;/gi, "<br>")
-
-    // <a href="...">
-    .replace(/&lt;a\s+href\s*=\s*"([^"]*)"&gt;/gi, '<a href="$1" target="_blank">')
+    .replace(/&lt;a\s+href\s*=\s*"([^"]*)"&gt;/gi, '<a href="$1" target="_blank" rel="noopener noreferrer">')
     .replace(/&lt;\/a&gt;/gi, "</a>")
-
-    // <img src="...">
     .replace(/&lt;img\s+src\s*=\s*"([^"]*)"(\s*\/?)&gt;/gi, '<img src="$1">');
 
   container.innerHTML = sanitized;
-
   output.appendChild(container);
   scrollToBottom();
 }
 
 async function readList(dir) {
   const cleanDir = normalizePath(dir);
-  const url = cleanDir === "/" ? "/list.json" : `${cleanDir}list.json`;
+  const url = cleanDir ? `./${cleanDir}list.json` : "./list.json";
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Could not load ${url}`);
   return await res.json();
@@ -141,8 +130,14 @@ function formatLsData(data) {
 
 function resolveFilePath(fileName) {
   if (!fileName) return null;
-  if (fileName.startsWith("/")) return fileName;
-  return currentDir === "/" ? `/${fileName}` : `${currentDir}${fileName}`;
+
+  const cleanName = String(fileName).replace(/^\.\/+/, "").replace(/^\/+/, "");
+
+  if (fileName.startsWith("/")) {
+    return `./${cleanName}`;
+  }
+
+  return currentDir ? `./${currentDir}${cleanName}` : `./${cleanName}`;
 }
 
 async function readTextFile(fileName) {
@@ -225,6 +220,7 @@ async function runCommand(command) {
 
   if (cmd === "clear") {
     output.innerHTML = "";
+    renderPrompt();
     return;
   }
 
@@ -240,7 +236,7 @@ async function runCommand(command) {
 
   if (cmd === "cd") {
     if (!arg || arg === "~" || arg === "/") {
-      currentDir = "/";
+      currentDir = "";
       return;
     }
 
@@ -274,7 +270,7 @@ async function runCommand(command) {
         return;
       }
 
-      currentDir = normalizePath(currentDir === "/" ? `/${target.name}` : `${currentDir}${target.name}`);
+      currentDir = normalizePath(currentDir + target.name);
     } catch (err) {
       printHTMLLine(`<span style="color:red;">${err.message}</span>`);
     }
