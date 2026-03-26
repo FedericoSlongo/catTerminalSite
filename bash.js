@@ -1,24 +1,19 @@
-let currentDir = "/"; // root folder
+let currentDir = "/";
+
 const output = document.getElementById("term");
-const input = document.getElementById("cmdInput");
+
+const capture = document.createElement("input");
+capture.className = "hidden-capture";
+capture.autocomplete = "off";
+capture.spellcheck = false;
+document.body.appendChild(capture);
+
+let currentCommand = "";
+let activeRow = null;
 
 function nowTime() {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
-
-function promptLine() {
-  return `${nowTime()} <span style="color: lightgreen;">cat</span>@<span style="color: cyan;">zero</span>:<span style="color: yellow;">${currentDir}</span> `;
-}
-
-function printPrompt() {
-  output.innerHTML += promptLine();
-  input.value = "";
-  input.focus();
-}
-
-function printLine(text) {
-  output.innerHTML += text + "<br>";
 }
 
 function normalizePath(path) {
@@ -36,27 +31,60 @@ function parentDir(path) {
   return parts.length ? "/" + parts.join("/") + "/" : "/";
 }
 
+function makePromptHTML() {
+  return `${nowTime()} <span style="color: lightgreen;">cat</span>@<span style="color: cyan;">zero</span>:<span style="color: yellow;">${currentDir}</span> `;
+}
+
+function renderPrompt() {
+  activeRow = document.createElement("div");
+  activeRow.className = "terminal-line";
+
+  const prompt = document.createElement("span");
+  prompt.className = "prompt";
+  prompt.innerHTML = makePromptHTML();
+
+  const cmd = document.createElement("span");
+  cmd.className = "cmd-text";
+
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+
+  activeRow.appendChild(prompt);
+  activeRow.appendChild(cmd);
+  activeRow.appendChild(cursor);
+  output.appendChild(activeRow);
+
+  currentCommand = "";
+  capture.value = "";
+  capture.focus();
+}
+
+function updateCurrentLine() {
+  if (!activeRow) return;
+  const cmdSpan = activeRow.querySelector(".cmd-text");
+  const cursor = activeRow.querySelector(".cursor");
+  cmdSpan.textContent = currentCommand;
+  if (cursor) cursor.style.display = "inline-block";
+}
+
+function printLine(text) {
+  const line = document.createElement("div");
+  line.innerHTML = text;
+  output.appendChild(line);
+}
+
 async function readList(dir) {
   const cleanDir = normalizePath(dir);
   const url = cleanDir === "/" ? "/list.json" : `${cleanDir}list.json`;
   const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Could not load ${url}`);
-  }
+  if (!res.ok) throw new Error(`Could not load ${url}`);
   return await res.json();
 }
 
 function formatLsData(data) {
-  // supports:
-  // 1) ["file1", "folder1"]
-  // 2) [{ name: "home", type: "dir" }, ...]
   if (Array.isArray(data)) {
-    if (typeof data[0] === "string" || data.length === 0) {
-      return data.join("  ");
-    }
-    return data
-      .map(item => item.type === "dir" ? `${item.name}/` : item.name)
-      .join("  ");
+    if (typeof data[0] === "string" || data.length === 0) return data.join("  ");
+    return data.map(item => item.type === "dir" ? `${item.name}/` : item.name).join("  ");
   }
   return String(data);
 }
@@ -102,9 +130,7 @@ async function runCommand(command) {
         entries = data;
       }
 
-      const target = entries.find(item =>
-        item.name === arg || item.name === `${arg}/`
-      );
+      const target = entries.find(item => item.name === arg || item.name === `${arg}/`);
 
       if (!target) {
         printLine(`<span style="color:red;">cd: no such directory: ${arg}</span>`);
@@ -116,9 +142,7 @@ async function runCommand(command) {
         return;
       }
 
-      currentDir = normalizePath(
-        currentDir === "/" ? `/${target.name}` : `${currentDir}${target.name}`
-      );
+      currentDir = normalizePath(currentDir === "/" ? `/${target.name}` : `${currentDir}${target.name}`);
     } catch (err) {
       printLine(`<span style="color:red;">${err.message}</span>`);
     }
@@ -128,15 +152,32 @@ async function runCommand(command) {
   printLine(`<span style="color:red;">command not found: ${cmd}</span>`);
 }
 
-input.addEventListener("keydown", async (e) => {
+capture.addEventListener("input", () => {
+  currentCommand = capture.value;
+  updateCurrentLine();
+});
+
+capture.addEventListener("keydown", async (e) => {
   if (e.key === "Enter") {
-    const value = input.value;
-    input.style.display = "none";
+    e.preventDefault();
 
-    output.innerHTML += value + "<br>";
-    await runCommand(value);
+    const entered = currentCommand;
+    const cmdSpan = activeRow.querySelector(".cmd-text");
+    const cursor = activeRow.querySelector(".cursor");
 
-    printPrompt();
-    input.style.display = "block";
+    if (cursor) cursor.remove();
+
+    cmdSpan.textContent = entered;
+    output.appendChild(document.createElement("br"));
+
+    await runCommand(entered);
+    renderPrompt();
   }
 });
+
+document.addEventListener("click", () => capture.focus());
+window.addEventListener("keydown", () => capture.focus());
+
+window.printPrompt = function () {
+  renderPrompt();
+};

@@ -36,7 +36,7 @@ function printNextLine() {
     i++;
     setTimeout(printNextLine, 40);
   } else {
-    if (window.printPrompt) window.printPrompt();
+    window.printPrompt();
   }
 }
 

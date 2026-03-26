@@ -158,3 +158,42 @@
 .crt {
   animation: textShadow 5s infinite;
 }
+
+
+.terminal-line {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.prompt {
+  white-space: nowrap;
+}
+
+.hidden-capture {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  left: -9999px;
+}
+
+.cursor {
+  display: inline-block;
+  font-family: inherit;
+  color: inherit;
+  margin-left: 2px;
+
+  /* Use a real character instead of a box */
+  content: "█";
+}
+
+.cursor::after {
+  content: "█";
+  animation: cursorBlink 1s steps(1) infinite;
+}
+
+@keyframes cursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
