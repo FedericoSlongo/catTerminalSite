@@ -12,20 +12,20 @@ Welcome to arch  (GNU/Linux 6.19.6-arch1-1)
 
  System information
 
-  System load:              0.03
+  System load:              0.0${Math.floor(Math.random() * 9)+1}
   Usage of /:               87.8% of 479.87GB
-  Memory usage:             31%
+  Memory usage:             ${Math.floor(Math.random() * 70)+31}%
   Swap usage:               14%
-  Temperature:              61.0 C
-  Processes:                227
-  Users logged in:          1
-  IPv4 address for enp0s25: 192.168.100.10
+  Temperature:              ${Math.floor(Math.random() * 50)+51}.0 C
+  Processes:                ${Math.floor(Math.random() * 150)+50}
+  Users logged in:          ${Math.floor(Math.random() * 2)+1}
+  IPv4 address for enp0s25: ${Math.floor(Math.random() * 255)+1}.${Math.floor(Math.random() * 255)+1}.${Math.floor(Math.random() * 255)+1}.${Math.floor(Math.random() * 255)+1}
 
   => / is using 87.8% of 479.87GB
 
 *** System restart required ***
 
-Last login: Now from 192.168.1.1
+Last login: Now from 192.168.${Math.floor(Math.random() * 255)+1}.${Math.floor(Math.random() * 255)+1}
 `;
 
 const lines = text.split("\n");
