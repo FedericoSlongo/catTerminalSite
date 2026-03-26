@@ -62,15 +62,27 @@ function renderPrompt() {
 function updateCurrentLine() {
   if (!activeRow) return;
   const cmdSpan = activeRow.querySelector(".cmd-text");
-  const cursor = activeRow.querySelector(".cursor");
-  cmdSpan.textContent = currentCommand;
-  if (cursor) cursor.style.display = "inline-block";
+  if (cmdSpan) cmdSpan.textContent = currentCommand;
 }
 
 function printLine(text) {
   const line = document.createElement("div");
-  line.innerHTML = text;
+  line.textContent = text;
   output.appendChild(line);
+}
+
+function printHTMLLine(html) {
+  const line = document.createElement("div");
+  line.innerHTML = html;
+  output.appendChild(line);
+}
+
+function printPre(text) {
+  const pre = document.createElement("pre");
+  pre.style.margin = "0";
+  pre.style.whiteSpace = "pre-wrap";
+  pre.textContent = text;
+  output.appendChild(pre);
 }
 
 async function readList(dir) {
@@ -84,9 +96,24 @@ async function readList(dir) {
 function formatLsData(data) {
   if (Array.isArray(data)) {
     if (typeof data[0] === "string" || data.length === 0) return data.join("  ");
-    return data.map(item => item.type === "dir" ? `${item.name}/` : item.name).join("  ");
+    return data
+      .map(item => item.type === "dir" ? `${item.name}/` : item.name)
+      .join("  ");
   }
   return String(data);
+}
+
+function resolveFilePath(fileName) {
+  if (!fileName) return null;
+  if (fileName.startsWith("/")) return fileName;
+  return currentDir === "/" ? `/${fileName}` : `${currentDir}${fileName}`;
+}
+
+async function readTextFile(fileName) {
+  const filePath = resolveFilePath(fileName);
+  const res = await fetch(filePath);
+  if (!res.ok) throw new Error(`cat: ${fileName}: No such file`);
+  return await res.text();
 }
 
 async function runCommand(command) {
@@ -96,12 +123,17 @@ async function runCommand(command) {
 
   if (!cmd) return;
 
+  if (cmd === "clear") {
+    output.innerHTML = "";
+    return;
+  }
+
   if (cmd === "ls") {
     try {
       const data = await readList(currentDir);
       printLine(formatLsData(data));
     } catch (err) {
-      printLine(`<span style="color:red;">${err.message}</span>`);
+      printHTMLLine(`<span style="color:red;">${err.message}</span>`);
     }
     return;
   }
@@ -133,23 +165,38 @@ async function runCommand(command) {
       const target = entries.find(item => item.name === arg || item.name === `${arg}/`);
 
       if (!target) {
-        printLine(`<span style="color:red;">cd: no such directory: ${arg}</span>`);
+        printHTMLLine(`<span style="color:red;">cd: no such directory: ${arg}</span>`);
         return;
       }
 
       if (target.type !== "dir") {
-        printLine(`<span style="color:red;">cd: not a directory: ${arg}</span>`);
+        printHTMLLine(`<span style="color:red;">cd: not a directory: ${arg}</span>`);
         return;
       }
 
       currentDir = normalizePath(currentDir === "/" ? `/${target.name}` : `${currentDir}${target.name}`);
     } catch (err) {
-      printLine(`<span style="color:red;">${err.message}</span>`);
+      printHTMLLine(`<span style="color:red;">${err.message}</span>`);
     }
     return;
   }
 
-  printLine(`<span style="color:red;">command not found: ${cmd}</span>`);
+  if (cmd === "cat") {
+    if (!arg) {
+      printHTMLLine(`<span style="color:red;">cat: missing file operand</span>`);
+      return;
+    }
+
+    try {
+      const text = await readTextFile(arg);
+      printPre(text);
+    } catch (err) {
+      printHTMLLine(`<span style="color:red;">${err.message}</span>`);
+    }
+    return;
+  }
+
+  printHTMLLine(`<span style="color:red;">command not found: ${cmd}</span>`);
 }
 
 capture.addEventListener("input", () => {
@@ -166,7 +213,6 @@ capture.addEventListener("keydown", async (e) => {
     const cursor = activeRow.querySelector(".cursor");
 
     if (cursor) cursor.remove();
-
     cmdSpan.textContent = entered;
     output.appendChild(document.createElement("br"));
 

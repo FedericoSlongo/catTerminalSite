@@ -34,7 +34,7 @@ function printNextLine() {
   if (i < lines.length) {
     document.getElementById("term").innerHTML += lines[i] + "<br>";
     i++;
-    setTimeout(printNextLine, 40);
+    setTimeout(printNextLine, 200);
   } else {
     window.printPrompt();
   }
