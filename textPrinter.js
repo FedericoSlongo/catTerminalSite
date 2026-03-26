@@ -25,10 +25,10 @@ Welcome to arch  (GNU/Linux 6.19.6-arch1-1)
 
 *** System restart required ***
 
-Last login: Now from 192.168.${Math.floor(Math.random() * 255)+1}.${Math.floor(Math.random() * 255)+1}
-`;
+Last login: Now from 192.168.${Math.floor(Math.random() * 255)+1}.${Math.floor(Math.random() * 255)+1}`;
 
 const lines = text.split("\n");
+var called = 0;
 const output = document.getElementById("term");
 
 let i = 0;
@@ -39,6 +39,9 @@ function printNextLine() {
     i++;
     setTimeout(printNextLine, 200); // 0.2 seconds
   }
+  if(i == lines.length && called == 0){
+    called = 1;
+    printBash();
+  }
 }
-
 printNextLine();
