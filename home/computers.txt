@@ -5,14 +5,14 @@ The cpu is a AMD Ryzen 5 1600AF, 32Gb of 3200MHz ram, AMD RX 5700 XT and about 6
 The monitor is an ultrawide 3440x1440 165Hz 34"
 I use a G502 Hero and a cheap mechanical keyboard
 
-<img src = "../imgs/mainPc/7Cl5MhuU.jpg"> <img src = "../imgs/mainPc/IMG_20240913_163757.jpg">
+<img src = "./imgs/mainPc/7Cl5MhuU.jpg"> <img src = "./imgs/mainPc/IMG_20240913_163757.jpg">
 
 
 Thinkpad T14 Gen 1
 The cpu is a AMD Ryzen 5 PRO 4650U, 16Gb of ram, AMD ATI Radeon RX Vega 6
-<img src = "../imgs/T14/IMG_20250828_131411.jpg"> <img src = "../imgs/T14/IMG_20250522_155833.jpg">
+<img src = "./imgs/T14/IMG_20250828_131411.jpg"> <img src = "./imgs/T14/IMG_20250522_155833.jpg">
 If you wanna see the process of sticker bombing my T14 Gen 1, check out the <a href="https://kernelkitty.it/homePage/blog/t14Stickers/">dedicated blog post</a>.
 
 Raspberry Pies
 I have 2 pi zero, one is the pi zero and the other one is a pi zero 2w
-<img src = "../imgs/Pi/IMG_20250522_144921.jpg">
+<img src = "./imgs/Pi/IMG_20250522_144921.jpg">
