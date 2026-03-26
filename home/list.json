@@ -1,4 +1,6 @@
 [
-  { "name": "docs", "type": "dir" },
-  { "name": "notes.txt", "type": "file" }
+  { "name": "computers.txt", "type": "file" },
+  { "name": "servers.txt", "type": "file" },
+  { "name": "phones.txt", "type": "file" },
+  { "name": "vr.txt", "type": "file" }
 ]

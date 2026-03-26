@@ -1,0 +1,13 @@
+<h1>Servers</h1>
+
+The server that is hosting this site is a thinkpad t440p running ubuntu server
+With an intel i5 4300M, 8Gb of ram and about 2 terrabytes of space
+<img src = "../imgs/T440P/IMG_20240913_163655.jpg"> <img src = "../imgs/T440P/IMG_20250219_122321.jpg">
+
+A used custom build pc running truenas
+The cpu is a AMD A8-7600, 18gb of ram (yes 18 :3) about 2.5 tb of space (a 1tb hdd and 3 500gb hdd (in RAIDZ1))
+<img src = "../imgs/NAS/IMG_20250224_192349.jpg"> <img src = "../imgs/NAS/IMG_20250308_100740.jpg">
+
+An old prebuild also from lenovo running fedora server
+The cpu is a AMD Athlon 5150, 4Gb of ram and about 2 tb of space
+(no images available at the moment)
