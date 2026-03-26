@@ -1,0 +1,4 @@
+[
+  { "name": "docs", "type": "dir" },
+  { "name": "notes.txt", "type": "file" }
+]

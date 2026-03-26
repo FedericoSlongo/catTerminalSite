@@ -1,0 +1,5 @@
+[
+  { "name": "home", "type": "dir" },
+  { "name": "about.txt", "type": "file" },
+  { "name": "projects", "type": "dir" }
+]

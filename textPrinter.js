@@ -28,20 +28,16 @@ Welcome to arch  (GNU/Linux 6.19.6-arch1-1)
 Last login: Now from 192.168.${Math.floor(Math.random() * 255)+1}.${Math.floor(Math.random() * 255)+1}`;
 
 const lines = text.split("\n");
-var called = 0;
-const output = document.getElementById("term");
-
 let i = 0;
 
 function printNextLine() {
   if (i < lines.length) {
-    output.innerHTML += lines[i] + "<br>";
+    document.getElementById("term").innerHTML += lines[i] + "<br>";
     i++;
-    setTimeout(printNextLine, 200); // 0.2 seconds
-  }
-  if(i == lines.length && called == 0){
-    called = 1;
-    printBash();
+    setTimeout(printNextLine, 40);
+  } else {
+    if (window.printPrompt) window.printPrompt();
   }
 }
+
 printNextLine();
